@@ -1,4 +1,4 @@
 # Project Name: cypress_web_ui_testing
-# clone the project 'https://github.com/rathahello/cypress_web_ui_testing.git' -> cd to project
-# open project and run command "npm install cypress"
-# run command "npx cypress open" to run the project 
+1. clone the project 'https://github.com/rathahello/cypress_web_ui_testing.git' -> cd to project
+2. open project and run command "npm install cypress"
+3. run command "npx cypress open" to run the project 
