@@ -1,4 +1,6 @@
 import { randomValues } from './random';
+import { dataObject } from './data';
+
 class TaxInvoice{
     createInvoice(address, telephone, vatTin, quantity, unitPrice) {
         let customerName = `${randomValues.randomString(10)}`;
@@ -20,7 +22,7 @@ class TaxInvoice{
         cy.customInput('[x-model="item.quantity"]', quantity);
         cy.customInput('[x-model="item.unitPrice"]', unitPrice);
         cy.get('button[x-on\\:click="add()"]').click();
-        cy.writeFile(`cypress/fixtures/responseJson/invoice_created.json`, { customerName, address, telephone, vatTin, quantity, unitPrice });
+        dataObject.writeJsonData('invoice_created.json', { customerName, address, telephone, vatTin, quantity, unitPrice });
     }
 }
 export const taxInvoice = new TaxInvoice();

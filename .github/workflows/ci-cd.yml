@@ -1,0 +1,33 @@
+name: CI/CD Pipeline
+
+# 1. Define when this pipeline should run
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# 2. Define the automation tasks
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npx cypress run --browser electron
+
+      - name: Deploy Application
+        if: github.ref == 'refs/heads/main'
+        run: echo "Deploying application..."

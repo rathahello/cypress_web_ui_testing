@@ -31,10 +31,21 @@
 //     return cy.wait(label, {timeout: timeout});
 // }
 
-Cypress.Commands.add('customInput', (selector, value) => {
-  cy.get(selector)
+Cypress.Commands.add('customInput', (element, value) => {
+  cy.get(element)
     .filter(':visible')
     .first()
     .clear()
     .type(value);
 });
+Cypress.Commands.add('customContainsClick', (element, value) => {
+  cy.contains(element, value)
+    .should("be.visible")
+    .click();
+})
+Cypress.Commands.add('customClick', (element, eq) => {
+  cy.get(element).eq(eq).click();
+})
+Cypress.Commands.add('customEqInput', (element, eq, value) => {
+  cy.get(element).eq(eq).type(value);
+})

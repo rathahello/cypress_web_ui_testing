@@ -13,5 +13,8 @@ class DataObject {
                 return data; // Return the first row of data
             });
     }
+    writeJsonData(fileName, data) {
+        cy.writeFile("cypress/fixtures/responseJson/" + fileName, data);
+    }
 }
 export const dataObject = new DataObject();
