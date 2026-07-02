@@ -1,0 +1,61 @@
+name: CI/CD Pipeline
+
+# 1. Define when this pipeline should run
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      test_environment:
+        description: 'Target Environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      spec_path:
+        description: 'Test Suite File'
+        required: true
+        default: 'cypress/e2e/authentication/tc_01_login_to_orangehrm.cy.js'
+        type: choice
+        options:
+          - cypress/e2e/authentication/tc_01_login_to_orangehrm.cy.js
+          - cypress/e2e/authentication/tc_02_invalid_login.cy.js
+          - cypress/e2e/tax_invoice/tc_01_create_invoice.cy.js
+          - cypress/e2e/tax_invoice/tc_02_submit_invoice.cy.js
+          - cypress/e2e/user_management/tc_01_add_user.cy.js
+
+# 2. Define the automation tasks
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_ENV: ${{ github.event.inputs.test_environment || 'staging' }}
+      SPEC_PATH: ${{ github.event.inputs.spec_path || 'cypress/e2e/authentication/tc_01_login_to_orangehrm.cy.js' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Show selected config
+        run: echo "Running tests on $TARGET_ENV for $SPEC_PATH"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npx cypress run --browser electron --spec "$SPEC_PATH"
+
+      - name: Deploy Application
+        if: github.ref == 'refs/heads/main'
+        run: echo "Deploying application..."
