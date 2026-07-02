@@ -8,26 +8,41 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      spec_path:
-        description: 'Cypress spec file to run'
+      test_environment:
+        description: 'Target Environment'
         required: true
         default: 'staging'
-        type: choice     # This forces GitHub to display a dropdown select menu
+        type: choice
         options:
           - development
           - staging
           - production
+      spec_path:
+        description: 'Test Suite File'
+        required: true
+        default: 'cypress/e2e/authentication/tc_01_login_to_orangehrm.cy.js'
+        type: choice
+        options:
+          - cypress/e2e/authentication/tc_01_login_to_orangehrm.cy.js
+          - cypress/e2e/authentication/tc_02_invalid_login.cy.js
+          - cypress/e2e/tax_invoice/tc_01_create_invoice.cy.js
+          - cypress/e2e/tax_invoice/tc_02_submit_invoice.cy.js
+          - cypress/e2e/user_management/tc_01_add_user.cy.js
 
 # 2. Define the automation tasks
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     env:
-      SPEC_PATH: ${{ github.event.inputs.spec_path || inputs.spec_path || 'cypress/e2e/authentication/login.cy.js' }}
+      TARGET_ENV: ${{ github.event.inputs.test_environment || 'staging' }}
+      SPEC_PATH: ${{ github.event.inputs.spec_path || 'cypress/e2e/authentication/tc_01_login_to_orangehrm.cy.js' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Show selected config
+        run: echo "Running tests on $TARGET_ENV for $SPEC_PATH"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
