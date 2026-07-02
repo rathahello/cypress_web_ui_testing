@@ -6,11 +6,24 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      spec_path:
+        description: 'Cypress spec file to run'
+        required: true
+        default: 'staging'
+        type: choice     # This forces GitHub to display a dropdown select menu
+        options:
+          - development
+          - staging
+          - production
 
 # 2. Define the automation tasks
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      SPEC_PATH: ${{ github.event.inputs.spec_path || inputs.spec_path || 'cypress/e2e/authentication/login.cy.js' }}
 
     steps:
       - name: Checkout code
@@ -26,7 +39,7 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npx cypress run --browser electron
+        run: npx cypress run --browser electron --spec "$SPEC_PATH"
 
       - name: Deploy Application
         if: github.ref == 'refs/heads/main'
