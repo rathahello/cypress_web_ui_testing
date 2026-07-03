@@ -69,17 +69,20 @@ jobs:
 
       - name: Telegram Notification
         if: always()
+        shell: bash
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           STATUS="${{ job.status }}"
-          PROJECT="${GITHUB_REPOSITORY}"
+          PROJECT=$(basename "$GITHUB_REPOSITORY")
           BRANCH="${GITHUB_REF#refs/heads/}"
           COMMIT="${GITHUB_SHA}"
-          AUTHOR=$(git show -s --format='%an' "$GITHUB_SHA" 2>/dev/null || echo "${GITHUB_ACTOR}")
-          MESSAGE="GitHub Actions Pipeline Completed\nProject: $PROJECT\nBranch: $BRANCH\nCommit: $COMMIT\nAuthor: $AUTHOR\nWorkflow: ${{ github.workflow }}\nStatus: $STATUS\nSpec: $SPEC_PATH"
-          RESPONSE=$(curl -sS -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+          MESSAGE="GitHub Actions Pipeline Completed\n\nProject: $PROJECT\nBranch: $BRANCH\nCommit: $COMMIT\nWorkflow: ${{ github.workflow }}\nStatus: $STATUS\nPath: $SPEC_PATH"
+          RESPONSE=$(curl -sS -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TG_CHAT_ID}" \
             -d text="$(printf '%b' "$MESSAGE")")
-        #   echo "Telegram response: $RESPONSE"
+        #echo "Telegram response: $RESPONSE"
 
       - name: Deploy Application
         if: github.ref == 'refs/heads/main'
