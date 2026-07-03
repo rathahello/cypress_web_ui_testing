@@ -10,13 +10,23 @@ on:
     inputs:
       test_environment:
         description: 'Target Environment'
-        required: true
+        required: false
         default: 'staging'
         type: choice
         options:
           - development
           - staging
           - production
+      browser:
+        description: 'Browser for Testing'
+        required: false
+        default: 'electron'
+        type: choice
+        options:
+          - electron
+          - chrome
+          - firefox
+          - edge
       spec_path:
         description: 'Test Suite File'
         required: true
@@ -24,7 +34,7 @@ on:
         type: choice
         options:
           - cypress/e2e/authentication/tc_01_login_to_orangehrm.cy.js
-          - cypress/e2e/authentication/tc_02_invalid_login.cy.js
+          - cypress/e2e/authentication/tc_02_login.cy.js
           - cypress/e2e/tax_invoice/tc_01_create_invoice.cy.js
           - cypress/e2e/tax_invoice/tc_02_submit_invoice.cy.js
           - cypress/e2e/user_management/tc_01_add_user.cy.js
@@ -35,14 +45,15 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TARGET_ENV: ${{ github.event.inputs.test_environment || 'staging' }}
-      SPEC_PATH: ${{ github.event.inputs.spec_path || 'cypress/e2e/authentication/tc_01_login_to_orangehrm.cy.js' }}
+      SPEC_PATH: ${{ github.event.inputs.spec_path || 'cypress/e2e/**/*.cy.js' }}
+      BROWSER: ${{ github.event.inputs.browser || 'electron' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Show selected config
-        run: echo "Running tests on $TARGET_ENV for $SPEC_PATH"
+        run: echo "Running $SPEC_PATH on $TARGET_ENV and using $BROWSER"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -55,6 +66,23 @@ jobs:
 
       - name: Run tests
         run: npx cypress run --browser electron --spec "$SPEC_PATH"
+
+      - name: Telegram Notification
+        if: always()
+        shell: bash
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          STATUS="${{ job.status }}"
+          PROJECT=$(basename "$GITHUB_REPOSITORY")
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          COMMIT="${GITHUB_SHA}"
+          MESSAGE="GitHub Actions Pipeline Completed\n\nProject: $PROJECT\nBranch: $BRANCH\nCommit: $COMMIT\nWorkflow: ${{ github.workflow }}\nStatus: $STATUS\nPath: $SPEC_PATH"
+          RESPONSE=$(curl -sS -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TG_CHAT_ID}" \
+            -d text="$(printf '%b' "$MESSAGE")")
+        #echo "Telegram response: $RESPONSE"
 
       - name: Deploy Application
         if: github.ref == 'refs/heads/main'
