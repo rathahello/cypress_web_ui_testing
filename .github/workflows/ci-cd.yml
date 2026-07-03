@@ -71,10 +71,15 @@ jobs:
         if: always()
         run: |
           STATUS="${{ job.status }}"
-          MESSAGE="GitHub Actions Pipeline Completed\nWorkflow: ${{ github.workflow }}\nStatus: $STATUS\nPath: $SPEC_PATH"
-          RESPONSE=$(curl -sS -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage"  \
+          PROJECT="${GITHUB_REPOSITORY}"
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          COMMIT="${GITHUB_SHA}"
+          AUTHOR=$(git show -s --format='%an' "$GITHUB_SHA" 2>/dev/null || echo "${GITHUB_ACTOR}")
+          MESSAGE="GitHub Actions Pipeline Completed\nProject: $PROJECT\nBranch: $BRANCH\nCommit: $COMMIT\nAuthor: $AUTHOR\nWorkflow: ${{ github.workflow }}\nStatus: $STATUS\nSpec: $SPEC_PATH"
+          RESPONSE=$(curl -sS -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
             -d text="$(printf '%b' "$MESSAGE")")
+        #   echo "Telegram response: $RESPONSE"
 
       - name: Deploy Application
         if: github.ref == 'refs/heads/main'
