@@ -14,6 +14,9 @@
     "cypress": "^15.18.0"
   },
   "devDependencies": {
+    "mochawesome": "^7.1.4",
+    "mochawesome-merge": "^5.1.1",
+    "mochawesome-report-generator": "^6.3.2",
     "neat-csv": "^5.2.0"
   }
 }

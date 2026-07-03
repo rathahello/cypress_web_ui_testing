@@ -66,6 +66,36 @@ jobs:
 
       - name: Run tests
         run: npx cypress run --browser electron --spec "$SPEC_PATH"
+      
+      - name: Merge Mochawesome Reports
+        if: always()
+        run: |
+          npx mochawesome-merge 'cypress/reports/mochawesome*.json' -o cypress/reports/mochawesome.json
+
+      - name: Generate HTML Reports
+        if: always()
+        run: |
+          npx mochawesome-report-generator cypress/reports/mochawesome.json -o cypress/reports
+
+      - name: Upload Test Reports as Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-reports
+          path: cypress/reports/
+          retention-days: 30
+      
+      - name: Comment PR with Report Link
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '📊 Test Report: Check the artifacts for detailed Cypress test reports'
+            })
 
       - name: Telegram Notification
         if: always()
