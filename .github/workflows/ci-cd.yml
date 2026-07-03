@@ -56,6 +56,19 @@ jobs:
       - name: Run tests
         run: npx cypress run --browser electron --spec "$SPEC_PATH"
 
+      - name: Telegram Notification
+        if: always()
+        uses: appleboy/telegram-action@v0.2.0
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            GitHub Actions pipeline completed
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            Status: ${{ job.status }}
+            Spec: $SPEC_PATH
+
       - name: Deploy Application
         if: github.ref == 'refs/heads/main'
         run: echo "Deploying application..."
