@@ -63,11 +63,11 @@ jobs:
             echo "Telegram secrets not configured. Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID."
             exit 1
           fi
-          STATUS=${{ job.status }}
-          MESSAGE=$'GitHub Actions pipeline completed\nRepository: ${{ github.repository }}\nWorkflow: ${{ github.workflow }}\nStatus: $STATUS\nSpec: $SPEC_PATH'
+          STATUS="${{ job.status }}"
+          MESSAGE="GitHub Actions pipeline completed\nRepository: ${{ github.repository }}\nWorkflow: ${{ github.workflow }}\nStatus: $STATUS\nSpec Path: $SPEC_PATH"
           RESPONSE=$(curl -sS -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d text="$MESSAGE")
+            -d text="$(printf '%b' "$MESSAGE")")
           echo "Telegram response: $RESPONSE"
           if ! echo "$RESPONSE" | grep -q '"ok":true'; then
             echo "Telegram notification failed. Check bot token, chat id, and bot access to chat."
