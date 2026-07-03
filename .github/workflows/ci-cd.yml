@@ -10,13 +10,23 @@ on:
     inputs:
       test_environment:
         description: 'Target Environment'
-        required: true
+        required: false
         default: 'staging'
         type: choice
         options:
           - development
           - staging
           - production
+      browser:
+        description: 'Browser for Testing'
+        required: false
+        default: 'electron'
+        type: choice
+        options:
+          - electron
+          - chrome
+          - firefox
+          - edge
       spec_path:
         description: 'Test Suite File'
         required: true
@@ -36,13 +46,14 @@ jobs:
     env:
       TARGET_ENV: ${{ github.event.inputs.test_environment || 'staging' }}
       SPEC_PATH: ${{ github.event.inputs.spec_path || 'cypress/e2e/**/*.cy.js' }}
+      BROWSER: ${{ github.event.inputs.browser || 'electron' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Show selected config
-        run: echo "Running tests on $TARGET_ENV for $SPEC_PATH"
+        run: echo "Running $SPEC_PATH on $TARGET_ENV and using $BROWSER"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -64,7 +75,6 @@ jobs:
           RESPONSE=$(curl -sS -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage"  \
             -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
             -d text="$(printf '%b' "$MESSAGE")")
-          echo "Telegram response: $RESPONSE"
 
       - name: Deploy Application
         if: github.ref == 'refs/heads/main'
