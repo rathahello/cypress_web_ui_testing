@@ -90,7 +90,7 @@ jobs:
         uses: pavi2410/html-preview-action@v5
         with:
           html_file: index.html
-          site_root: dist
+          site_root: cypress/reports/
           upload: auto
           job_summary: true
       
