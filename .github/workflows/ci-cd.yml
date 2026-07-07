@@ -77,13 +77,22 @@ jobs:
         run: |
           npx mochawesome-report-generator cypress/reports/mochawesome.json -o cypress/reports
 
-      - name: Upload Test Reports as Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
+      # - name: Upload Test Reports as Artifacts
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: cypress-reports
+      #     path: cypress/reports/
+      #     retention-days: 5
+
+      - name: HTML Preview
+        id: html_preview
+        uses: pavi2410/html-preview-action@v5
         with:
-          name: cypress-reports
-          path: cypress/reports/
-          retention-days: 30
+          html_file: mochawesome.html
+          site_root: cypress/reports/
+          upload: auto
+          job_summary: true
       
       - name: Comment PR with Report Link
         if: always() && github.event_name == 'pull_request'
