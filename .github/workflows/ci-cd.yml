@@ -92,7 +92,7 @@ jobs:
           html_file: mochawesome.html
           site_root: cypress/reports/
           upload: auto
-          job_summary: true
+          job_summary: false
       
       # - name: Comment PR with Report Link
       #   if: always() && github.event_name == 'pull_request'
