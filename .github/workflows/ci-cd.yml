@@ -121,10 +121,10 @@ jobs:
 
           MESSAGE="<b>Cypress E2E Tests: ${STATUS}</b>%0A%0A"
           MESSAGE+="<b>Project:</b> ${{ github.repository }}%0A"
-          MESSAGE+= "<b>Branch:</b> ${{ github.ref_name }}%0A"
-          MESSAGE+= "<b>Commit:</b> ${{ github.sha }}%0A"
-          MESSAGE+= "<b>Workflow:</b> ${{ github.workflow }}%0A"
-          MESSAGE+= "<b>Path:</b> ${SPEC_PATH}%0A"
+          MESSAGE+="<b>Branch:</b> ${{ github.ref_name }}%0A"
+          MESSAGE+="<b>Commit:</b> ${{ github.sha }}%0A"
+          MESSAGE+="<b>Workflow:</b> ${{ github.workflow }}%0A"
+          MESSAGE+="<b>Path:</b> ${{ env.SPEC_PATH }}%0A"
           MESSAGE+="<b>Run Details:</b> <a href=\"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\">View Actions Log</a>"
           
           curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
