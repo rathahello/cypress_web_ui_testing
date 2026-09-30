@@ -119,7 +119,7 @@ jobs:
             STATUS="❌ FAILED"
           fi
 
-          MESSAGE="• <b>Cypress E2E Tests: ${STATUS}</b>%0A%0A"
+          MESSAGE="<b>Cypress E2E Tests: ${STATUS}</b>%0A%0A"
           MESSAGE+="• <b>Project:</b> ${{ github.repository }}%0A"
           MESSAGE+="• <b>Branch:</b> ${{ github.ref_name }}%0A"
           MESSAGE+="• <b>Commit:</b> ${{ github.sha }}%0A"
