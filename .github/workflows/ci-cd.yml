@@ -118,19 +118,20 @@ jobs:
           else
             STATUS="❌ FAILED"
           fi
-          PROJECT=$(basename "$GITHUB_REPOSITORY")
-          BRANCH="${GITHUB_REF#refs/heads/}"
-          COMMIT="${GITHUB_SHA}"
+
           MESSAGE="<b>Cypress E2E Tests: ${STATUS}</b>%0A%0A"
-          MESSAGE+="<b>Project: $PROJECT</b>%0A"
-          MESSAGE+= "<b>Branch: $BRANCH</b>%0A"
-          MESSAGE+= "<b>Commit: $COMMIT</b>%0A"
-          MESSAGE+= "<b>Workflow: ${{ github.workflow }}</b>%0A"
-          MESSAGE+= "<b>Status: $STATUS</b>%0A"
-          MESSAGE+= "<b>Path: $SPEC_PATH</b>%0A"
-          RESPONSE=$(curl -sS -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
-            -d chat_id="${TG_CHAT_ID}" \
-            -d text="$(printf '%b' "$MESSAGE")")
+          MESSAGE+="<b>Project:</b> ${{ github.repository }}%0A"
+          MESSAGE+= "<b>Branch:</b> ${{ github.ref_name }}%0A"
+          MESSAGE+= "<b>Commit:</b> ${{ github.sha }}%0A"
+          MESSAGE+= "<b>Workflow:</b> ${{ github.workflow }}%0A"
+          MESSAGE+= "<b>Path:</b> ${SPEC_PATH}%0A"
+          MESSAGE+="<b>Run Details:</b> <a href=\"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\">View Actions Log</a>"
+          
+          curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TG_CHAT_ID}" \
+            -d "parse_mode=HTML" \
+            -d "disable_web_page_preview=true" \
+            -d "text=${MESSAGE}"
 
       - name: Deploy Application
         if: github.ref == 'refs/heads/main'
