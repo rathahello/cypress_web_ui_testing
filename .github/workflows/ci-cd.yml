@@ -1,4 +1,4 @@
-name: E2E Cypress Tests Pipeline
+name: Cypress E2E Tests
 
 # 1. Define when this pipeline should run
 on:
