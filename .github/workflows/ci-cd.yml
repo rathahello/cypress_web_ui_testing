@@ -1,11 +1,11 @@
-name: E2E Cypress Tests Pipeline
+name: Cypress E2E Tests Pipeline
 
 # 1. Define when this pipeline should run
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   pull_request:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:
     inputs:
       test_environment:
@@ -108,20 +108,29 @@ jobs:
 
       - name: Telegram Notification
         if: always()
-        shell: bash
+        # shell: bash
         env:
           TG_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          STATUS="${{ job.status }}"
-          PROJECT=$(basename "$GITHUB_REPOSITORY")
-          BRANCH="${GITHUB_REF#refs/heads/}"
-          COMMIT="${GITHUB_SHA}"
-          MESSAGE="GitHub Actions Pipeline Completed\n\nProject: $PROJECT\nBranch: $BRANCH\nCommit: $COMMIT\nWorkflow: ${{ github.workflow }}\nStatus: $STATUS\nPath: $SPEC_PATH"
-          RESPONSE=$(curl -sS -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
-            -d chat_id="${TG_CHAT_ID}" \
-            -d text="$(printf '%b' "$MESSAGE")")
-        #echo "Telegram response: $RESPONSE"
+          if [ "${{ job.status }}" = "success" ]; then
+            STATUS="✅ PASSED"
+          else
+            STATUS="❌ FAILED"
+          fi
+
+          MESSAGE="<b>Cypress E2E Tests: ${STATUS}</b>%0A%0A"
+          MESSAGE+="• <b>Project:</b> ${{ github.repository }}%0A"
+          MESSAGE+="• <b>Branch:</b> ${{ github.ref_name }}%0A"
+          MESSAGE+="• <b>Commit:</b> ${{ github.sha }}%0A"
+          MESSAGE+="• <b>Path:</b> ${{ env.SPEC_PATH }}%0A"
+          MESSAGE+="• <b>Run Details:</b> <a href=\"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\">View Actions Log</a>"
+          
+          curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TG_CHAT_ID}" \
+            -d "parse_mode=HTML" \
+            -d "disable_web_page_preview=true" \
+            -d "text=${MESSAGE}"
 
       - name: Deploy Application
         if: github.ref == 'refs/heads/main'
