@@ -3,9 +3,9 @@ name: Cypress E2E Tests Pipeline
 # 1. Define when this pipeline should run
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   pull_request:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:
     inputs:
       test_environment:
